@@ -9,6 +9,7 @@
 
 #include "request.h"
 #include "temperature.h"
+#include "timestamp.h"
 
 #include <SFE_MicroOLED.h> 
 
@@ -17,7 +18,6 @@
 
 MicroOLED oled(PIN_RESET, DC_JUMPER);
 // D1 and D2 are used by the led matrix
-long currentTimestamp = 0;
 
 const char* iotHost = "opentsdb.iot.runabove.io";
 const char* iotUrl = "/api/put";
@@ -41,6 +41,7 @@ const char* apiFingerprint = "B2 B5 11 E3 EA 5D 3A C0 72 E0 7E 70 46 C8 D1 CA EA
 String buildData(String timestamp, const char* name, float value) {
   return String("[{\"metric\":\"") + String(name) + String("\",\"value\":" + String(value) + ",\"timestamp\":" + timestamp + "}]");
 }
+
 
 /**
  * Connect to the wifi
@@ -67,28 +68,29 @@ void wifiConnect(const char* wifi_ssid, const char* wifi_password) {
   oled.display();
 }
 
+void showCursor(char* str) {
+  oled.setCursor(56,0);
+  oled.print(str);
+  oled.display();
+}
+
 /**
  * Wait before launchin the next measure. It animate a curor on the screen
  */
 void wait() {
-  oled.setCursor(56,0);
-  oled.print("/");
-  oled.display();
+  showCursor("/");
   delay(1000);
   
-  oled.setCursor(56,0);
-  oled.print("-");
-  oled.display();
+  showCursor("-");
   delay(1000);
 
-  oled.setCursor(56,0);
-  oled.print("\\");
-  oled.display();
+  showCursor("\\");
   delay(1000);
 
-  oled.setCursor(56,0);
-  oled.print("|");
-  oled.display();
+  showCursor("|");
+  delay(1000);
+
+  showCursor("?");
 }
 
 void setup() {
@@ -105,14 +107,7 @@ void setup() {
   delay(1000);
   oled.clear(PAGE);
   oled.display();
-}
-
-long getTime() {
-  //if (currentTimestamp<100000) {
-    String timestamp = sendRequest("GET", apiHost, apiPort, apiUrl, apiFingerprint, "", 0, 0, oled);
-    currentTimestamp = timestamp.toInt();
-  //}
-  return currentTimestamp;
+  initTimestampTimer(apiHost, apiPort, apiUrl, apiFingerprint, &oled);
 }
 
 /**
@@ -129,8 +124,9 @@ void loop() {
       oled.print(" ");
       oled.println(celcius);
       oled.print("celcius");
+      showCursor(">");
       
-      sendRequest("POST", iotHost, iotPort, iotUrl, iotFingerprint, buildData(String(getTime()), "Temperature", celcius), iotId, iotKey, oled);
+      sendRequest("POST", iotHost, iotPort, iotUrl, iotFingerprint, buildData(String(getTimestamp()), "Temperature", celcius), iotId, iotKey, oled);
     } else {
       oled.print(" xx.xx ");
     }
