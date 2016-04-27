@@ -1,0 +1,10 @@
+#ifndef __CONFIG_IOT_TEMP__H__
+#define __CONFIG_IOT_TEMP__H__
+
+const char* ssid = "xxxxxxxx";
+const char* password = "xxxxxxxx";
+
+const char* iotId = "xxxxxxxx";
+const char* iotKey = "xxxxxxxxx";
+
+#endif
