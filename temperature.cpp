@@ -35,7 +35,7 @@ bool getAddress() {
  * Launch a measure on a sensor
  * @return Temperature in celcius
  */
-float performMeasure() {
+int performRawMeasure() {
   byte type_s;
   byte data[12];
   byte i;
@@ -95,5 +95,9 @@ float performMeasure() {
     else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
     //// default is 12 bit resolution, 750 ms conversion time
   }
-  return (float)raw / 16.0;
+  return raw;
+}
+
+float performMeasure() {
+  return (float)performRawMeasure() / 16.0;
 }

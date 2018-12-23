@@ -14,6 +14,8 @@ bool getAddress();
  */
 float performMeasure();
 
+int performRawMeasure();
+
 /**
  * True if at least one sensor was found
  * @return True if found
